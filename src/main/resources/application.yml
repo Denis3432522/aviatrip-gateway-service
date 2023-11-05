@@ -1,0 +1,12 @@
+eureka:
+  client:
+    service-url:
+      defaultZone:
+
+spring:
+  cloud:
+    gateway:
+      routes:
+
+  application:
+    name: gateway-service
