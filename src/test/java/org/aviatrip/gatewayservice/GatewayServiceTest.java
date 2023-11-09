@@ -1,4 +1,4 @@
-package com.aviatrip.gatewayservice;
+package org.aviatrip.gatewayservice;
 
 import org.springframework.boot.test.context.SpringBootTest;
 

@@ -7,6 +7,9 @@ spring:
   cloud:
     gateway:
       routes:
-
   application:
     name: gateway-service
+
+jwt:
+  secret:
+  token-expiration:
