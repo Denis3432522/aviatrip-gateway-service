@@ -25,6 +25,6 @@ public class AuthenticationFilter extends AbstractGatewayFilterFactory<Authentic
         return new AuthenticationGatewayFilter(jwtUtil, requestAuthorizer);
     }
 
-    public static class Config {;
+    public static class Config {
     }
 }

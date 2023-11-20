@@ -2,9 +2,6 @@ package org.aviatrip.gatewayservice.config;
 
 import org.aviatrip.gatewayservice.config.authorizer.RequestAuthorizer;
 import org.aviatrip.gatewayservice.config.authorizer.RequestAuthorizerBuilder;
-import org.aviatrip.gatewayservice.config.properties.JwtProperties;
-import org.aviatrip.gatewayservice.util.JwtUtil;
-import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
@@ -19,16 +16,5 @@ public class SecurityConfig {
                 .requestMatcher("/api/auth/signup").permitAll()
                 .requestMatcher("/api/auth/token").permitAll()
                 .anyRequest(withAuthentication());
-    }
-
-    @Bean
-    public JwtUtil jwtUtil() {
-        return new JwtUtil(jwtProperties());
-    }
-
-    @Bean
-    @ConfigurationProperties(prefix = "jwt")
-    public JwtProperties jwtProperties() {
-        return new JwtProperties();
     }
 }
