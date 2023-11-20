@@ -23,7 +23,7 @@ public class RequestAuthorizer {
 
         return matcher.isPresent() ? matcher.get().getSecurityRequirement() :
                 fallbackSecurityRequirement;
-    };
+    }
 
     public Optional<RequestMatcher> findRequestMatcher(String path, HttpMethod method) {
         if(isEmptyPath(path) || method == null)

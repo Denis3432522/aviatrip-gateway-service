@@ -3,6 +3,7 @@ package org.aviatrip.gatewayservice.filter;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.aviatrip.gatewayservice.config.authorizer.RequestAuthorizer;
 import org.aviatrip.gatewayservice.config.authorizer.SecurityRequirement;
 import org.aviatrip.gatewayservice.util.JwtUtil;
@@ -17,8 +18,10 @@ import reactor.core.publisher.Mono;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationGatewayFilter implements GatewayFilter {
 
     private final JwtUtil jwtUtil;
@@ -37,13 +40,27 @@ public class AuthenticationGatewayFilter implements GatewayFilter {
         String token = parseToken(exchange.getRequest());
         Jws<Claims> claims = parseClaim(token);
 
-        String subject = jwtUtil.getClaim("sub", claims)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "access denied"));
+        Optional<String> optionalSub = jwtUtil.getClaim("sub", claims);
+
+        if(optionalSub.isEmpty()) {
+            log.error("missing header [sub] in the jwt token payload");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "access denied");
+        }
+
+        Optional<String> optionalRole = jwtUtil.getClaim("role", claims);
+
+        if(optionalRole.isEmpty()) {
+            log.error("missing header [role] in the jwt token payload");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "access denied");
+        }
 
         if(requirement.getRoles().length > 0)
-            authorizeUser(claims, requirement.getRoles());
+            authorizeUser(optionalRole.get(), requirement.getRoles());
 
-        ServerHttpRequest request = exchange.getRequest().mutate().header("subject", subject).build();
+        ServerHttpRequest request = exchange.getRequest().mutate()
+                .header("subject", optionalSub.get())
+                .header("role", optionalRole.get())
+                .build();
 
         return chain.filter(exchange.mutate().request(request).build());
     }
@@ -65,10 +82,7 @@ public class AuthenticationGatewayFilter implements GatewayFilter {
         }
     }
 
-    private void authorizeUser(Jws<Claims> claims, String[] authorizedRoles) {
-        String role = jwtUtil.getClaim("role", claims)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.FORBIDDEN, "access denied"));;
-
+    private void authorizeUser(String role, String[] authorizedRoles) {
         if(Arrays.stream(authorizedRoles).noneMatch(s -> s.equals(role)))
             throw new ResponseStatusException(HttpStatus.FORBIDDEN, "access denied");
     }

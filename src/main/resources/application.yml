@@ -3,13 +3,32 @@ eureka:
     service-url:
       defaultZone:
 
+server:
+  servlet:
+    context-path: /api
+  port:
+
 spring:
+  config:
+    import: configtree:/run/secrets/
   cloud:
     gateway:
       routes:
-  application:
-    name: gateway-service
+        - id: identity-service
+          uri: lb://identity-service
+          predicates:
+            - Path=/api/auth/**, /api/profile/**
+          filters:
+            - name: AuthenticationFilter
+
+logging:
+  level:
+    reactor:
+      netty: INFO
+    org:
+      springframework:
+        cloud:
+          gateway: TRACE
 
 jwt:
-  secret:
-  token-expiration:
+  secret: ${jwt_secret}
