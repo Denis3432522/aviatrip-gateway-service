@@ -6,7 +6,7 @@ public class SecurityRequirement {
 
     private final boolean requireAuthentication;
     @Getter
-    private String[] roles;
+    private final String[] roles;
 
     private SecurityRequirement(boolean requireAuthentication, String[] roles) {
         this.requireAuthentication = requireAuthentication;

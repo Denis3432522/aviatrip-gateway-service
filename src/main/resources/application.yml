@@ -20,6 +20,12 @@ spring:
             - Path=/api/auth/**, /api/profile/**
           filters:
             - name: AuthenticationFilter
+        - id: representative-service
+          uri: lb://representative-service
+          predicates:
+            - Path=/api/representative/**
+          filters:
+            - name: AuthenticationFilter
 
 logging:
   level:

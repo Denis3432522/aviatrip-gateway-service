@@ -43,15 +43,15 @@ public class AuthenticationGatewayFilter implements GatewayFilter {
         Optional<String> optionalSub = jwtUtil.getClaim("sub", claims);
 
         if(optionalSub.isEmpty()) {
-            log.error("missing header [sub] in the jwt token payload");
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "access denied");
+            log.error("Missing header [sub] in the jwt token payload");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
         Optional<String> optionalRole = jwtUtil.getClaim("role", claims);
 
         if(optionalRole.isEmpty()) {
-            log.error("missing header [role] in the jwt token payload");
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "access denied");
+            log.error("Missing header [role] in the jwt token payload");
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
         }
 
         if(requirement.getRoles().length > 0)
@@ -69,7 +69,7 @@ public class AuthenticationGatewayFilter implements GatewayFilter {
         List<String> authList = request.getHeaders().get(HttpHeaders.AUTHORIZATION);
 
         if(authList == null || authList.size() != 1 || authList.get(0) == null)
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not authenticated");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
 
         return authList.get(0).replaceFirst("Bearer ", "");
     }
@@ -78,12 +78,14 @@ public class AuthenticationGatewayFilter implements GatewayFilter {
         try {
             return jwtUtil.parseClaims(token);
         } catch (Exception ex) {
-            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "not authenticated");
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "Not authenticated");
         }
     }
 
     private void authorizeUser(String role, String[] authorizedRoles) {
-        if(Arrays.stream(authorizedRoles).noneMatch(s -> s.equals(role)))
-            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "access denied");
+        if (Arrays.stream(authorizedRoles).noneMatch(s -> s.equals(role))) {
+            log.error("User with role [{}] not authorized", role);
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Access denied");
+        }
     }
 }
